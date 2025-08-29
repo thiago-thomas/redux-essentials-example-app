@@ -1,6 +1,7 @@
 import { useAppSelector } from '@/app/hooks'
 
 export default function PostsList() {
+  //Buscando a lista de posts com useAppSelector
   const posts = useAppSelector(state => state.posts)
 
   const renderedPosts = posts.map(post => (
