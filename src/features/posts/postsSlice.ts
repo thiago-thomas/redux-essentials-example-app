@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
 
 //Definindo o tipo TS para o dado do slice (post)
 export interface Post {
@@ -20,8 +20,19 @@ const postsSlice = createSlice({
   reducers: {
     //DICA: Nomeclatura boa para reducer é colocar uma ação no passado (Ex: postAdded)
     //Reducer de adicionar o post passando o state, e a action tipada
-    postAdded: (state, action: PayloadAction<Post>) => {
-      state.push(action.payload) //Atualizando a lista imutavelmente com immer
+    postAdded: {
+      reducer(state, action: PayloadAction<Post>) {
+        state.push(action.payload) //Atualizando a lista imutavelmente com immer
+      },
+      //`prepare` serve para pré-processar os dados da action
+      // antes de chegar ao reducer, garantindo que o formato 
+      // esteja correto e que informações adicionais (como o `id`) 
+      // sejam incluídas automaticamente.
+      prepare(title: string, content: string) {
+        return {
+          payload: { id: nanoid(), title, content }
+        }
+      }
     },
     //Reducer de editar o post com immer (não esquecer)
     postUpdated: (state, action: PayloadAction<Post>) => {
