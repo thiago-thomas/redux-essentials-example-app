@@ -1,4 +1,5 @@
 import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
+import type { RootState } from '@/app/store'
 
 //Definindo o tipo TS para o dado do slice (post)
 export interface Post {
@@ -51,3 +52,8 @@ export const { postAdded, postUpdated } = postsSlice.actions
 
 //Exportando a função reducer gerada
 export default postsSlice.reducer
+
+//Exportando os seletores
+export const selectAllPosts = (state: RootState) => state.posts
+export const selectPostById = (state: RootState, postId: string) =>
+  state.posts.find((post) => post.id === postId)

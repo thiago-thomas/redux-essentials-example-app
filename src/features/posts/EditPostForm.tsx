@@ -7,6 +7,9 @@ import { useAppSelector, useAppDispatch } from '@/app/hooks'
 //Importando o action creator/reducer postUpdated
 import { postUpdated } from '@/features/posts/postsSlice'
 
+//Importando o seletor escolhe o posto pelo Id
+import { selectPostById } from '@/features/posts/postsSlice'
+
 interface EditPostFormFields extends HTMLFormControlsCollection {
   postTitle: HTMLInputElement
   postContent: HTMLTextAreaElement
@@ -21,7 +24,8 @@ export function EditPostForm() {
   const { postId } = useParams()
 
   //Buscando com o 'find' na store com 'useAppSelector', 'o post' com o msmo id do parametro
-  const post = useAppSelector((state) => state.posts.find((post) => post.id === postId))
+  //Buscando o post pelo id, agora usando o seletor 'selectPostById'
+  const post = useAppSelector((state) => selectPostById(state, postId!))
 
   //Preparando 'dispatch' e 'navigate'
   const dispatch = useAppDispatch()
