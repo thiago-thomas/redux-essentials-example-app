@@ -8,7 +8,7 @@ export function PostsList() {
   //E agora com o seletor 'selectAllPosts'
   const posts = useAppSelector(selectAllPosts)
 
-  const renderedPosts = posts.map(post => (
+  const renderedPosts = posts.map((post) => (
     <article className="post-excerpt" key={post.id}>
       <h3>
         <Link to={`/posts/${post.id}`}>{post.title}</Link>

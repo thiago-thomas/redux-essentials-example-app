@@ -1,9 +1,9 @@
 import React from 'react'
 import { nanoid } from '@reduxjs/toolkit'
 //Importando o useDispatch tipado
-import { useAppDispatch } from "@/app/hooks"
+import { useAppDispatch } from '@/app/hooks'
 //Importando o tipo do Post, e o action creator
-import { type Post, postAdded } from "@/features/posts/postsSlice"
+import { type Post, postAdded } from '@/features/posts/postsSlice'
 
 interface AddPostFormFields extends HTMLFormControlsCollection {
   postTitle: HTMLInputElement

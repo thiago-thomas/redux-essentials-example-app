@@ -1,14 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 interface User {
-  id: string,
+  id: string
   name: string
 }
 
 const initialState: User[] = [
   { id: '0', name: 'Chris' },
   { id: '1', name: 'Shermie' },
-  { id: '0', name: 'Yashiro' }
+  { id: '0', name: 'Yashiro' },
 ]
 
 const usersSlice = createSlice({
@@ -16,11 +16,11 @@ const usersSlice = createSlice({
   initialState,
   reducers: {},
   selectors: {
-    selectAllUsers: userState => userState,
+    selectAllUsers: (userState) => userState,
     selectUserById: (userState, userId: string) => {
       return userState.find((user) => user.id === userId)
-    }
-  }
+    },
+  },
 })
 
 export const { selectAllUsers, selectUserById } = usersSlice.selectors

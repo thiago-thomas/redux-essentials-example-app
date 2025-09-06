@@ -26,14 +26,14 @@ const postsSlice = createSlice({
         state.push(action.payload) //Atualizando a lista imutavelmente com immer
       },
       //`prepare` serve para pré-processar os dados da action
-      // antes de chegar ao reducer, garantindo que o formato 
-      // esteja correto e que informações adicionais (como o `id`) 
+      // antes de chegar ao reducer, garantindo que o formato
+      // esteja correto e que informações adicionais (como o `id`)
       // sejam incluídas automaticamente.
       prepare(title: string, content: string) {
         return {
-          payload: { id: nanoid(), title, content }
+          payload: { id: nanoid(), title, content },
         }
-      }
+      },
     },
     //Reducer de editar o post com immer (não esquecer)
     postUpdated: (state, action: PayloadAction<Post>) => {
@@ -49,15 +49,15 @@ const postsSlice = createSlice({
   selectors: {
     //Note que todos esses selectors são dados apenas o 'PostState'
     //como argumento e não o 'RootState' inteiro
-    selectAllPosts: postState => postState,
+    selectAllPosts: (postState) => postState,
     selectPostById: (postState, postId: string) => {
       return postState.find((post) => post.id === postId)
-    }
-  }
+    },
+  },
 })
 
 //Exportando os selectors que foram criados dentro do createSlice
-export const { selectAllPosts, selectPostById  } = postsSlice.selectors
+export const { selectAllPosts, selectPostById } = postsSlice.selectors
 
 //Exportando as action creators
 export const { postAdded, postUpdated } = postsSlice.actions

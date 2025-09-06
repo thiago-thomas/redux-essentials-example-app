@@ -8,8 +8,8 @@ import usersReducer from '@/features/users/usersSlice'
 export const store = configureStore({
   reducer: {
     posts: postsReducer,
-    users: usersReducer
-  }
+    users: usersReducer,
+  },
 })
 
 //Infere-se ao tipo da 'store'
@@ -17,4 +17,4 @@ export type AppStore = typeof store
 
 //Infere-se ao "tipo" da 'useDispatch' e do 'useSelector'
 export type AppDispatch = typeof store.dispatch
-export type RootState = ReturnType<typeof store.getState> 
+export type RootState = ReturnType<typeof store.getState>
