@@ -45,7 +45,19 @@ const postsSlice = createSlice({
       }
     },
   },
+  //Criando os selectors dentro so createSlice
+  selectors: {
+    //Note que todos esses selectors são dados apenas o 'PostState'
+    //como argumento e não o 'RootState' inteiro
+    selectAllPosts: postState => postState,
+    selectPostById: (postState, postId: string) => {
+      return postState.find((post) => post.id === postId)
+    }
+  }
 })
+
+//Exportando os selectors que foram criados dentro do createSlice
+export const { selectAllPosts, selectPostById  } = postsSlice.selectors
 
 //Exportando as action creators
 export const { postAdded, postUpdated } = postsSlice.actions
@@ -53,7 +65,10 @@ export const { postAdded, postUpdated } = postsSlice.actions
 //Exportando a função reducer gerada
 export default postsSlice.reducer
 
-//Exportando os seletores
+//Exportando os selectors
+/* 
+/ //Criando fora do createSlice
 export const selectAllPosts = (state: RootState) => state.posts
 export const selectPostById = (state: RootState, postId: string) =>
   state.posts.find((post) => post.id === postId)
+*/
