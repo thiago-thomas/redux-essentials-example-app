@@ -8,7 +8,7 @@ interface User {
 const initialState: User[] = [
   { id: '0', name: 'Chris' },
   { id: '1', name: 'Shermie' },
-  { id: '0', name: 'Yashiro' },
+  { id: '2', name: 'Yashiro' },
 ]
 
 const usersSlice = createSlice({

@@ -6,12 +6,16 @@ export interface Post {
   id: string
   title: string
   content: string
+  userId: string
 }
+
+//Pick serve para 'clonar' uma tipagem, pegando apenas os tipos que quer
+type PostUpdate = Pick<Post, 'id' | 'title' | 'content'>
 
 //Criando o initialState
 const initialState: Post[] = [
-  { id: '1', title: '1° Post', content: 'Learning Redux part 01' },
-  { id: '2', title: '2° Post', content: 'Learning Redux part 02' },
+  { id: '1', title: '1° Post', content: 'Learning Redux part 01', userId: '0' },
+  { id: '2', title: '2° Post', content: 'Learning Redux part 02', userId: '0' },
 ]
 
 //Criando o Slice passando o initialState
@@ -29,14 +33,14 @@ const postsSlice = createSlice({
       // antes de chegar ao reducer, garantindo que o formato
       // esteja correto e que informações adicionais (como o `id`)
       // sejam incluídas automaticamente.
-      prepare(title: string, content: string) {
+      prepare(title: string, content: string, userId: string) {
         return {
-          payload: { id: nanoid(), title, content },
+          payload: { id: nanoid(), title, content, userId },
         }
       },
     },
     //Reducer de editar o post com immer (não esquecer)
-    postUpdated: (state, action: PayloadAction<Post>) => {
+    postUpdated: (state, action: PayloadAction<PostUpdate>) => {
       const { id, title, content } = action.payload
       const existingPost = state.find((post) => post.id === id)
       if (existingPost) {

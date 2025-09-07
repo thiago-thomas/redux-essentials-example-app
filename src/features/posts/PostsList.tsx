@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useAppSelector } from '@/app/hooks'
 //Importando o seletor para selecionar todos os posts
 import { selectAllPosts } from './postsSlice'
+import { PostAuthor } from './PostAuthor'
 
 export function PostsList() {
   //Buscando a lista de posts com 'useAppSelector'
@@ -14,6 +15,9 @@ export function PostsList() {
         <Link to={`/posts/${post.id}`}>{post.title}</Link>
       </h3>
       <p className="post-content">{post.content.substring(0, 100)}</p>
+      <span>
+        Post made by <PostAuthor userId={post.userId} />
+      </span>
     </article>
   ))
 

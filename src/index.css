@@ -24,6 +24,10 @@ p {
   margin: 0.25rem;
 }
 
+select {
+  margin-bottom: 16px;
+}
+
 @media (max-width: 599px) {
   .button.small {
     padding: 0.2rem 0.5rem;
