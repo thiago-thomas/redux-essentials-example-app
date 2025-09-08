@@ -1,5 +1,6 @@
 import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '@/app/store'
+import { sub, format } from 'date-fns'
 
 //Definindo o tipo TS para o dado do slice (post)
 export interface Post {
@@ -7,6 +8,7 @@ export interface Post {
   title: string
   content: string
   userId: string
+  date: string
 }
 
 //Pick serve para 'clonar' uma tipagem, pegando apenas os tipos que quer
@@ -14,8 +16,20 @@ type PostUpdate = Pick<Post, 'id' | 'title' | 'content'>
 
 //Criando o initialState
 const initialState: Post[] = [
-  { id: '1', title: '1° Post', content: 'Learning Redux part 01', userId: '0' },
-  { id: '2', title: '2° Post', content: 'Learning Redux part 02', userId: '0' },
+  {
+    id: '1',
+    title: '1° Post',
+    content: 'Learning Redux part 01',
+    userId: '0',
+    date: sub(new Date(), { minutes: 10 }).toISOString(),
+  },
+  {
+    id: '2',
+    title: '2° Post',
+    content: 'Learning Redux part 02',
+    userId: '0',
+    date: sub(new Date(), { minutes: 5 }).toISOString(),
+  },
 ]
 
 //Criando o Slice passando o initialState
@@ -35,7 +49,7 @@ const postsSlice = createSlice({
       // sejam incluídas automaticamente.
       prepare(title: string, content: string, userId: string) {
         return {
-          payload: { id: nanoid(), title, content, userId },
+          payload: { id: nanoid(), title, content, userId, date: new Date().toISOString() },
         }
       },
     },
