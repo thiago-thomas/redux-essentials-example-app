@@ -2,6 +2,14 @@ import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '@/app/store'
 import { sub, format } from 'date-fns'
 
+export interface Reactions {
+  like: number
+  heart: number
+  rocket: number
+}
+
+export type ReactionName = keyof Reactions
+
 //Definindo o tipo TS para o dado do slice (post)
 export interface Post {
   id: string
@@ -9,10 +17,17 @@ export interface Post {
   content: string
   userId: string
   date: string
+  reactions: Reactions
 }
 
 //Pick serve para 'clonar' uma tipagem, pegando apenas os tipos que quer
 type PostUpdate = Pick<Post, 'id' | 'title' | 'content'>
+
+const initialReactions: Reactions = {
+  like: 0,
+  heart: 0,
+  rocket: 0,
+}
 
 //Criando o initialState
 const initialState: Post[] = [
@@ -22,6 +37,7 @@ const initialState: Post[] = [
     content: 'Learning Redux part 01',
     userId: '0',
     date: sub(new Date(), { minutes: 10 }).toISOString(),
+    reactions: initialReactions
   },
   {
     id: '2',
@@ -29,6 +45,7 @@ const initialState: Post[] = [
     content: 'Learning Redux part 02',
     userId: '0',
     date: sub(new Date(), { minutes: 5 }).toISOString(),
+    reactions: initialReactions
   },
 ]
 
@@ -49,7 +66,7 @@ const postsSlice = createSlice({
       // sejam incluídas automaticamente.
       prepare(title: string, content: string, userId: string) {
         return {
-          payload: { id: nanoid(), title, content, userId, date: new Date().toISOString() },
+          payload: { id: nanoid(), title, content, userId, date: new Date().toISOString(), reactions: initialReactions },
         }
       },
     },
@@ -62,6 +79,13 @@ const postsSlice = createSlice({
         existingPost.content = content
       }
     },
+    reactionAdded(state, action: PayloadAction<{postId: string; reaction: ReactionName}>) {
+      const { postId, reaction } = action.payload
+      const existingPost = state.find(post => post.id === postId)
+      if (existingPost) {
+        existingPost.reactions[reaction]++
+      }
+    }
   },
   //Criando os selectors dentro so createSlice
   selectors: {
@@ -78,7 +102,7 @@ const postsSlice = createSlice({
 export const { selectAllPosts, selectPostById } = postsSlice.selectors
 
 //Exportando as action creators
-export const { postAdded, postUpdated } = postsSlice.actions
+export const { postAdded, postUpdated, reactionAdded } = postsSlice.actions
 
 //Exportando a função reducer gerada
 export default postsSlice.reducer
