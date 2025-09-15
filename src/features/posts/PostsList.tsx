@@ -4,6 +4,7 @@ import { useAppSelector } from '@/app/hooks'
 import { selectAllPosts } from './postsSlice'
 import { PostAuthor } from './PostAuthor'
 import { TimeAgo } from '@/components/TimeAgo'
+import ReactionButtons from './ReactionButtons'
 
 export function PostsList() {
   //Buscando a lista de posts com 'useAppSelector'
@@ -29,6 +30,8 @@ export function PostsList() {
       <span>
         Posted <TimeAgo timestamp={post.date} />
       </span>
+      <br />
+      <ReactionButtons post={post} readOnly={false} />
     </article>
   ))
 
