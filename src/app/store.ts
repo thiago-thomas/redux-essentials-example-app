@@ -1,14 +1,16 @@
 //Configuração da store
 import { configureStore } from '@reduxjs/toolkit'
-//Importando o Slice da Posts
+
+//Importando os Reduces dos Slices
 import postsReducer from '@/features/posts/postsSlice'
-//Importando o Slice do Users
 import usersReducer from '@/features/users/usersSlice'
+import authReducers from '@/features/auth/authSlice'
 
 export const store = configureStore({
   reducer: {
     posts: postsReducer,
     users: usersReducer,
+    auth: authReducers,
   },
 })
 
