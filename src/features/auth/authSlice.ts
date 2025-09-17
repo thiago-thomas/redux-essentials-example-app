@@ -6,7 +6,7 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  username: null
+  username: null,
 }
 
 const authSlice = createSlice({
@@ -18,8 +18,8 @@ const authSlice = createSlice({
     },
     userLoggedOut(state) {
       state.username = null
-    }
-  }
+    },
+  },
 })
 
 export const { userLoggedIn, userLoggedOut } = authSlice.actions

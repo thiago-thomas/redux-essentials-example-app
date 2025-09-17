@@ -37,7 +37,7 @@ const initialState: Post[] = [
     content: 'Learning Redux part 01',
     userId: '0',
     date: sub(new Date(), { minutes: 10 }).toISOString(),
-    reactions: initialReactions
+    reactions: initialReactions,
   },
   {
     id: '2',
@@ -45,7 +45,7 @@ const initialState: Post[] = [
     content: 'Learning Redux part 02',
     userId: '0',
     date: sub(new Date(), { minutes: 5 }).toISOString(),
-    reactions: initialReactions
+    reactions: initialReactions,
   },
 ]
 
@@ -66,7 +66,14 @@ const postsSlice = createSlice({
       // sejam incluídas automaticamente.
       prepare(title: string, content: string, userId: string) {
         return {
-          payload: { id: nanoid(), title, content, userId, date: new Date().toISOString(), reactions: initialReactions },
+          payload: {
+            id: nanoid(),
+            title,
+            content,
+            userId,
+            date: new Date().toISOString(),
+            reactions: initialReactions,
+          },
         }
       },
     },
@@ -79,13 +86,13 @@ const postsSlice = createSlice({
         existingPost.content = content
       }
     },
-    reactionAdded(state, action: PayloadAction<{postId: string; reaction: ReactionName}>) {
+    reactionAdded(state, action: PayloadAction<{ postId: string; reaction: ReactionName }>) {
       const { postId, reaction } = action.payload
-      const existingPost = state.find(post => post.id === postId)
+      const existingPost = state.find((post) => post.id === postId)
       if (existingPost) {
         existingPost.reactions[reaction]++
       }
-    }
+    },
   },
   //Criando os selectors dentro so createSlice
   selectors: {

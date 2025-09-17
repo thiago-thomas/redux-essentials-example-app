@@ -7,7 +7,7 @@ import { TimeAgo } from '@/components/TimeAgo'
 //Importando o seletor escolhe o posto pelo Id
 import { selectPostById } from '@/features/posts/postsSlice'
 import { PostAuthor } from '@/features/posts/PostAuthor'
-import ReactionButtons from '@/features/posts/ReactionButtons'
+import { ReactionButtons } from '@/features/posts/ReactionButtons'
 
 import { selectCurrentUser } from '@/features/users/usersSlice'
 

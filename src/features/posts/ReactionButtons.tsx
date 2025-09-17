@@ -14,7 +14,7 @@ interface ReactionButtonsProps {
   readOnly: boolean
 }
 
-export default function ReactionButtons({ post, readOnly }: ReactionButtonsProps) {
+export function ReactionButtons({ post, readOnly }: ReactionButtonsProps) {
   const dispatch = useAppDispatch()
 
   const reactionButtons = Object.entries(reactionEmoji).map(([stringName, emoji]) => {
@@ -26,11 +26,7 @@ export default function ReactionButtons({ post, readOnly }: ReactionButtonsProps
         key={reaction}
         type="button"
         className="muted-button reaction-button"
-        onClick={
-          !readOnly
-            ? () => dispatch(reactionAdded({ postId: post.id, reaction }))
-            : undefined
-        }
+        onClick={!readOnly ? () => dispatch(reactionAdded({ postId: post.id, reaction })) : undefined}
       >
         {emoji} {post.reactions[reaction]}
       </button>
