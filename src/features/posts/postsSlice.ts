@@ -2,6 +2,8 @@ import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '@/app/store'
 import { sub, format } from 'date-fns'
 
+import { userLoggedOut } from '@/features/auth/authSlice'
+
 export interface Reactions {
   like: number
   heart: number
@@ -102,6 +104,18 @@ const postsSlice = createSlice({
     selectPostById: (postState, postId: string) => {
       return postState.find((post) => post.id === postId)
     },
+  },
+
+  //Reducers vs ExtraReducers
+  //Reducers: Use para definir novas actions como parte de um slice
+  //ExtraReducers: Use para manipular ações que foram definidas 'fora' do slice
+
+  extraReducers: (builder) => {
+    //'Ouve' a 'action creator', e realiza algo como a action é execultada
+    builder.addCase(userLoggedOut, (state) => {
+      //Aqui limpa os posts, quando a 'action creator' for execultada
+      return []
+    })
   },
 })
 
