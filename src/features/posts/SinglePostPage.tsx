@@ -1,16 +1,23 @@
 import { Link, useParams } from 'react-router-dom'
 
 import { useAppSelector } from '@/app/hooks'
-//Importando o seletor escolhe o posto pelo Id
-import { selectPostById } from './postsSlice'
-import { PostAuthor } from './PostAuthor'
+
 import { TimeAgo } from '@/components/TimeAgo'
-import ReactionButtons from './ReactionButtons'
+
+//Importando o seletor escolhe o posto pelo Id
+import { selectPostById } from '@/features/posts/postsSlice'
+import { PostAuthor } from '@/features/posts/PostAuthor'
+import ReactionButtons from '@/features/posts/ReactionButtons'
+
+import { selectCurrentUser } from '@/features/users/usersSlice'
 
 export const SinglePostPage = () => {
   const { postId } = useParams()
+
   //Buscando o post pelo id, agora usando o seletor 'selectPostById'
   const post = useAppSelector((state) => selectPostById(state, postId!))
+
+  const currentUser = useAppSelector(selectCurrentUser)!
 
   if (!post) {
     return (
@@ -19,6 +26,8 @@ export const SinglePostPage = () => {
       </section>
     )
   }
+
+  const canEdit = currentUser.id === post.userId
 
   return (
     <section>
@@ -40,9 +49,11 @@ export const SinglePostPage = () => {
           <br />
           <ReactionButtons post={post} readOnly={true} />
         </div>
-        <Link to={`/editPost/${post.id}`} className="button">
-          Edit Post
-        </Link>
+        {canEdit && (
+          <Link to={`/editPost/${post.id}`} className="button">
+            Edit Post
+          </Link>
+        )}
       </article>
     </section>
   )

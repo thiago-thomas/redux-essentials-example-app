@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks'
 //Importando o tipo do Post, e o action creator
 import { type Post, postAdded } from '@/features/posts/postsSlice'
 
-import { selectAllUsers } from '@/features/users/usersSlice'
+import { selectCurrentUser } from '@/features/users/usersSlice'
 
 interface AddPostFormFields extends HTMLFormControlsCollection {
   postTitle: HTMLInputElement
@@ -19,7 +19,9 @@ interface AddPostFormElements extends HTMLFormElement {
 
 export function AddPostForm() {
   const dispatch = useAppDispatch()
-  const users = useAppSelector(selectAllUsers)
+
+  // Aqui, 'user' nunca será considerado undefined pelo TypeScript
+  const user = useAppSelector(selectCurrentUser)!
 
   const handleSubmit = (e: React.FormEvent<AddPostFormElements>) => {
     e.preventDefault()
@@ -27,21 +29,14 @@ export function AddPostForm() {
     const { elements } = e.currentTarget
     const titleForm = elements.postTitle.value
     const contentForm = elements.postContent.value
-    const userId = elements.postAuthor.value
 
     //Agora nos podemos passar em parametros separados,
     //E o ID será gerado automaticamente
-    dispatch(postAdded(titleForm, contentForm, userId))
+    dispatch(postAdded(titleForm, contentForm, user.id))
 
-    console.log({ titleForm, contentForm, userId }) //Testando no console.log
+    console.log(titleForm, contentForm, user.id) //Testando no console.log
     e.currentTarget.reset()
   }
-
-  const userOptions = users.map((user) => (
-    <option key={user.id} value={user.id}>
-      {user.name}
-    </option>
-  ))
 
   return (
     <section>
@@ -51,11 +46,6 @@ export function AddPostForm() {
         <input type="text" id="postTitle" defaultValue="" placeholder="Put the post title" required />
         <label htmlFor="postContent">Content:</label>
         <textarea name="postContent" id="postContent" defaultValue="" required placeholder="Write the content" />
-        <label htmlFor="postAuthor">Author:</label>
-        <select name="postAuthor" id="postAuthor" required>
-          <option value=""></option>
-          {userOptions}
-        </select>
         <button>Save Post</button>
       </form>
     </section>
