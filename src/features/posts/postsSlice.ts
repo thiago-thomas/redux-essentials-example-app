@@ -3,6 +3,8 @@ import type { RootState } from '@/app/store'
 import { sub, format } from 'date-fns'
 
 import { userLoggedOut } from '@/features/auth/authSlice'
+import { createAppAsyncThunk } from '@/app/withTypes'
+import { client } from '@/api/client'
 
 export interface Reactions {
   like: number
@@ -31,25 +33,34 @@ const initialReactions: Reactions = {
   rocket: 0,
 }
 
+interface PostsState {
+  posts: Post[]
+  status: 'idle' | 'pending' | 'succeeded' | 'failed'
+  error: string | null
+}
+
+export const fetchPosts = createAppAsyncThunk(
+  'posts/fetchPosts',
+  async () => {
+    const response = await client.get<Post[]>('/fakeApi/posts')
+    return response.data
+  },
+  {
+    condition(arg, thunkApi) {
+      const postStatus = selectPostsStatus(thunkApi.getState())
+      if (postStatus !== 'idle') {
+        return false
+      }
+    },
+  },
+)
+
 //Criando o initialState
-const initialState: Post[] = [
-  {
-    id: '1',
-    title: '1° Post',
-    content: 'Learning Redux part 01',
-    userId: '0',
-    date: sub(new Date(), { minutes: 10 }).toISOString(),
-    reactions: initialReactions,
-  },
-  {
-    id: '2',
-    title: '2° Post',
-    content: 'Learning Redux part 02',
-    userId: '0',
-    date: sub(new Date(), { minutes: 5 }).toISOString(),
-    reactions: initialReactions,
-  },
-]
+const initialState: PostsState = {
+  posts: [],
+  status: 'idle',
+  error: null,
+}
 
 //Criando o Slice passando o initialState
 const postsSlice = createSlice({
@@ -60,7 +71,7 @@ const postsSlice = createSlice({
     //Reducer de adicionar o post passando o state, e a action tipada
     postAdded: {
       reducer(state, action: PayloadAction<Post>) {
-        state.push(action.payload) //Atualizando a lista imutavelmente com immer
+        state.posts.push(action.payload) //Atualizando a lista imutavelmente com immer
       },
       //`prepare` serve para pré-processar os dados da action
       // antes de chegar ao reducer, garantindo que o formato
@@ -82,7 +93,7 @@ const postsSlice = createSlice({
     //Reducer de editar o post com immer (não esquecer)
     postUpdated: (state, action: PayloadAction<PostUpdate>) => {
       const { id, title, content } = action.payload
-      const existingPost = state.find((post) => post.id === id)
+      const existingPost = state.posts.find((post) => post.id === id)
       if (existingPost) {
         existingPost.title = title
         existingPost.content = content
@@ -90,7 +101,7 @@ const postsSlice = createSlice({
     },
     reactionAdded(state, action: PayloadAction<{ postId: string; reaction: ReactionName }>) {
       const { postId, reaction } = action.payload
-      const existingPost = state.find((post) => post.id === postId)
+      const existingPost = state.posts.find((post) => post.id === postId)
       if (existingPost) {
         existingPost.reactions[reaction]++
       }
@@ -100,10 +111,12 @@ const postsSlice = createSlice({
   selectors: {
     //Note que todos esses selectors são dados apenas o 'PostState'
     //como argumento e não o 'RootState' inteiro
-    selectAllPosts: (postState) => postState,
+    selectAllPosts: (postState) => postState.posts,
     selectPostById: (postState, postId: string) => {
-      return postState.find((post) => post.id === postId)
+      return postState.posts.find((post) => post.id === postId)
     },
+    selectPostsStatus: (postState) => postState.status,
+    selectPostsError: (postState) => postState.error,
   },
 
   //Reducers vs ExtraReducers
@@ -112,15 +125,27 @@ const postsSlice = createSlice({
 
   extraReducers: (builder) => {
     //'Ouve' a 'action creator', e realiza algo como a action é execultada
-    builder.addCase(userLoggedOut, (state) => {
-      //Aqui limpa os posts, quando a 'action creator' for execultada
-      return []
-    })
+    builder
+      .addCase(userLoggedOut, (state) => {
+        //Aqui limpa os posts, quando a 'action creator' for execultada
+        return initialState
+      })
+      .addCase(fetchPosts.pending, (state, action) => {
+        state.status = 'pending'
+      })
+      .addCase(fetchPosts.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        state.posts.push(...action.payload)
+      })
+      .addCase(fetchPosts.rejected, (state, action) => {
+        state.status = 'failed'
+        state.error = action.error.message ?? 'Unknown Error'
+      })
   },
 })
 
 //Exportando os selectors que foram criados dentro do createSlice
-export const { selectAllPosts, selectPostById } = postsSlice.selectors
+export const { selectAllPosts, selectPostById, selectPostsStatus, selectPostsError } = postsSlice.selectors
 
 //Exportando as action creators
 export const { postAdded, postUpdated, reactionAdded } = postsSlice.actions

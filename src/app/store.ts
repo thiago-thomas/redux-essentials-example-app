@@ -1,5 +1,5 @@
 //Configuração da store
-import { configureStore } from '@reduxjs/toolkit'
+import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 
 //Importando os Reduces dos Slices
 import postsReducer from '@/features/posts/postsSlice'
@@ -20,3 +20,4 @@ export type AppStore = typeof store
 //Infere-se ao "tipo" da 'useDispatch' e do 'useSelector'
 export type AppDispatch = typeof store.dispatch
 export type RootState = ReturnType<typeof store.getState>
+export type AppThunk = ThunkAction<void, RootState, unknown, Action>
