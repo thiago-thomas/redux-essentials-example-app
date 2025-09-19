@@ -4,9 +4,11 @@ import type { Post, ReactionName } from './postsSlice'
 import { reactionAdded } from './postsSlice'
 
 const reactionEmoji: Record<ReactionName, string> = {
-  like: '👍',
+  thumbsUp: '👍',
+  tada: '🥁',
   heart: '❤️',
   rocket: '🚀',
+  eyes: '👀'
 }
 
 interface ReactionButtonsProps {

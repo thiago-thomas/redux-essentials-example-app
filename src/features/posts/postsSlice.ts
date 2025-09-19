@@ -7,9 +7,11 @@ import { createAppAsyncThunk } from '@/app/withTypes'
 import { client } from '@/api/client'
 
 export interface Reactions {
-  like: number
+  thumbsUp: number
+  tada: number
   heart: number
   rocket: number
+  eyes: number
 }
 
 export type ReactionName = keyof Reactions
@@ -28,9 +30,11 @@ export interface Post {
 type PostUpdate = Pick<Post, 'id' | 'title' | 'content'>
 
 const initialReactions: Reactions = {
-  like: 0,
+  thumbsUp: 0,
+  tada: 0,
   heart: 0,
   rocket: 0,
+  eyes: 0,
 }
 
 interface PostsState {

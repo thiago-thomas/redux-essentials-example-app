@@ -1,12 +1,13 @@
-import { Link } from 'react-router-dom'
+import { useEffect } from 'react'
+
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 
 //Importando o seletor para selecionar todos os posts
-import { fetchPosts, selectAllPosts, selectPostsStatus } from './postsSlice'
-import { PostAuthor } from './PostAuthor'
-import { TimeAgo } from '@/components/TimeAgo'
-import { ReactionButtons } from './ReactionButtons'
-import { useEffect } from 'react'
+import { fetchPosts, selectAllPosts, selectPostsError, selectPostsStatus } from '@/features/posts/postsSlice'
+
+import { PostExcerpt } from '@/features/posts/PostExcerpt'
+
+import { Spinner } from '@/components/Spinner'
 
 export function PostsList() {
   const dispatch = useAppDispatch()
@@ -17,6 +18,9 @@ export function PostsList() {
 
   //Codigo para iniciar a busca de posts na api com 'Thunks'
   const postStatus = useAppSelector(selectPostsStatus)
+
+  const postsError = useAppSelector(selectPostsError)
+
   useEffect(() => {
     if (postStatus === 'idle') {
       //Envia a ação, execulta o thunk, e dps o extraReducer do posts 'ouça' e faça algo.
@@ -24,34 +28,27 @@ export function PostsList() {
     }
   }, [postStatus, dispatch])
 
-  const orderedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date))
+  let content: React.ReactNode
 
-  const renderedPosts = orderedPosts.map((post) => (
-    <article className="post-excerpt" key={post.id}>
-      <h3>
-        <Link to={`/posts/${post.id}`}>{post.title}</Link>
-      </h3>
-      <p className="post-content">{post.content.substring(0, 100)}</p>
+  if (postStatus === 'pending') {
+    content = <Spinner text="Loading..." />
+  } else if (postStatus === 'succeeded') {
+    const orderedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date))
+
+    content = orderedPosts.map((post) => <PostExcerpt post={post} />)
+  } else if (postStatus === 'failed') {
+    content = (
       <div>
-        <span>
-          Post made by{' '}
-          <strong>
-            <PostAuthor userId={post.userId} />
-          </strong>
-        </span>
+        <h4>Error while fetch posts: </h4>
+        <p>{postsError}</p>
       </div>
-      <span>
-        Posted <TimeAgo timestamp={post.date} />
-      </span>
-      <br />
-      <ReactionButtons post={post} readOnly={false} />
-    </article>
-  ))
+    )
+  }
 
   return (
     <section className="posts-list">
       <h2>Posts</h2>
-      {renderedPosts}
+      {content}
     </section>
   )
 }

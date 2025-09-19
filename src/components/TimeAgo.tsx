@@ -16,7 +16,7 @@ export function TimeAgo({ timestamp }: TimeAgoProps) {
 
   return (
     <time dateTime={timestamp} title={timestamp}>
-      <i>{timeAgo}</i>
+      &nbsp; <i>{timeAgo}</i>
     </time>
   )
 }
