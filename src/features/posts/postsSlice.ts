@@ -1,4 +1,4 @@
-import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
+import { asyncThunkCreator, buildCreateSlice, createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '@/app/store'
 import { sub, format } from 'date-fns'
 
@@ -43,22 +43,6 @@ interface PostsState {
   error: string | null
 }
 
-export const fetchPosts = createAppAsyncThunk(
-  'posts/fetchPosts',
-  async () => {
-    const response = await client.get<Post[]>('/fakeApi/posts')
-    return response.data
-  },
-  {
-    condition(arg, thunkApi) {
-      const postStatus = selectPostsStatus(thunkApi.getState())
-      if (postStatus !== 'idle') {
-        return false
-      }
-    },
-  },
-)
-
 //Criando o initialState
 const initialState: PostsState = {
   posts: [],
@@ -66,50 +50,92 @@ const initialState: PostsState = {
   error: null,
 }
 
+//O Novo AppSlice para a versao alternativa de colocar Thunk dentro do createSlice(createAppSlice)
+export const createAppSlice = buildCreateSlice({
+  creators: { asyncThunk: asyncThunkCreator },
+})
+
 //Criando o Slice passando o initialState
-const postsSlice = createSlice({
+const postsSlice = createAppSlice({
   name: 'posts',
   initialState,
-  reducers: {
-    //DICA: Nomeclatura boa para reducer é colocar uma ação no passado (Ex: postAdded)
-    //Reducer de adicionar o post passando o state, e a action tipada
-    postAdded: {
-      reducer(state, action: PayloadAction<Post>) {
-        state.posts.push(action.payload) //Atualizando a lista imutavelmente com immer
-      },
-      //`prepare` serve para pré-processar os dados da action
-      // antes de chegar ao reducer, garantindo que o formato
-      // esteja correto e que informações adicionais (como o `id`)
-      // sejam incluídas automaticamente.
-      prepare(title: string, content: string, userId: string) {
-        return {
-          payload: {
-            id: nanoid(),
-            title,
-            content,
-            userId,
-            date: new Date().toISOString(),
-            reactions: initialReactions,
-          },
+  //Outra forma alternativa de fazer um reducer (create => { return ...})
+  reducers: (create) => {
+    return {
+      //DICA: Nomeclatura boa para reducer é colocar uma ação no passado (Ex: postAdded)
+      //Reducer de adicionar o post passando o state, e a action tipada
+
+      //Outra forma alternativa de criar prepare = `create.preparedReducer(prepare,casereducer)`
+      postAdded: create.preparedReducer(
+        //`prepare | preparedReducer` serve para pré-processar os dados da action
+        // antes de chegar ao reducer, garantindo que o formato
+        // esteja correto e que informações adicionais (como o `id`)
+        // sejam incluídas automaticamente.
+        (title: string, content: string, userId: string) => {
+          return {
+            payload: {
+              id: nanoid(),
+              title,
+              content,
+              userId,
+              date: new Date().toISOString(),
+              reactions: initialReactions,
+            },
+          }
+        },
+        (state, action: PayloadAction<Post>) => {
+          state.posts.push(action.payload) //Atualizando a lista imutavelmente com immer
+        },
+      ),
+
+      //outra forma alternativa de criar reducer = `create.reducer<PayloadType>(casereducer)`
+      postUpdated: create.reducer<PostUpdate>((state, action) => {
+        //Reducer de editar o post com immer (não esquecer)
+        const { id, title, content } = action.payload
+        const existingPost = state.posts.find((post) => post.id === id)
+        if (existingPost) {
+          existingPost.title = title
+          existingPost.content = content
         }
-      },
-    },
-    //Reducer de editar o post com immer (não esquecer)
-    postUpdated: (state, action: PayloadAction<PostUpdate>) => {
-      const { id, title, content } = action.payload
-      const existingPost = state.posts.find((post) => post.id === id)
-      if (existingPost) {
-        existingPost.title = title
-        existingPost.content = content
-      }
-    },
-    reactionAdded(state, action: PayloadAction<{ postId: string; reaction: ReactionName }>) {
-      const { postId, reaction } = action.payload
-      const existingPost = state.posts.find((post) => post.id === postId)
-      if (existingPost) {
-        existingPost.reactions[reaction]++
-      }
-    },
+      }),
+      reactionAdded: create.reducer<{ postId: string; reaction: ReactionName }>((state, action) => {
+        const { postId, reaction } = action.payload
+        const existingPost = state.posts.find((post) => post.id === postId)
+        if (existingPost) {
+          existingPost.reactions[reaction]++
+        }
+      }),
+
+      fetchPosts: create.asyncThunk(
+        async () => {
+          const response = await client.get<Post[]>('/fakeApi/posts')
+          return response.data
+        },
+        {
+          options: {
+            condition(arg, thunkApi) {
+              const { posts } = thunkApi.getState() as RootState
+              if (posts.status !== 'idle') {
+                return false
+              }
+            },
+          },
+          
+          pending: (state, action) => {
+            state.status = 'pending'
+          },
+          fulfilled: (state, action) => {
+            state.status = 'succeeded'
+            state.posts.push(...action.payload)
+          },
+          rejected: (state, action) => {
+            state.status = 'failed'
+            state.error = action.error.message ?? 'Unknown Error'
+          }
+
+        },
+      ),
+    }
   },
   //Criando os selectors dentro so createSlice
   selectors: {
@@ -134,17 +160,6 @@ const postsSlice = createSlice({
         //Aqui limpa os posts, quando a 'action creator' for execultada
         return initialState
       })
-      .addCase(fetchPosts.pending, (state, action) => {
-        state.status = 'pending'
-      })
-      .addCase(fetchPosts.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        state.posts.push(...action.payload)
-      })
-      .addCase(fetchPosts.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.error.message ?? 'Unknown Error'
-      })
   },
 })
 
@@ -152,7 +167,7 @@ const postsSlice = createSlice({
 export const { selectAllPosts, selectPostById, selectPostsStatus, selectPostsError } = postsSlice.selectors
 
 //Exportando as action creators
-export const { postAdded, postUpdated, reactionAdded } = postsSlice.actions
+export const { postAdded, postUpdated, reactionAdded, fetchPosts } = postsSlice.actions
 
 //Exportando a função reducer gerada
 export default postsSlice.reducer
