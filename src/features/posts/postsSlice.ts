@@ -21,7 +21,7 @@ export interface Post {
   id: string
   title: string
   content: string
-  userId: string
+  user: string
   date: string
   reactions: Reactions
 }
@@ -81,13 +81,13 @@ const postsSlice = createSlice({
       // antes de chegar ao reducer, garantindo que o formato
       // esteja correto e que informações adicionais (como o `id`)
       // sejam incluídas automaticamente.
-      prepare(title: string, content: string, userId: string) {
+      prepare(title: string, content: string, user: string) {
         return {
           payload: {
             id: nanoid(),
             title,
             content,
-            userId,
+            user,
             date: new Date().toISOString(),
             reactions: initialReactions,
           },

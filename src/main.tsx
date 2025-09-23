@@ -9,11 +9,15 @@ import { worker } from './api/server'
 
 import './primitiveui.css'
 import './index.css'
+import { fetchUsers } from './features/users/usersSlice'
 
 // Wrap app rendering so we can wait for the mock API to initialize
 async function start() {
   // Start our mock API server
   await worker.start({ onUnhandledRequest: 'bypass' })
+
+  //Dispachando a busca dos usuarios pela api, em seguida, colocando no slice
+  store.dispatch(fetchUsers())
 
   const root = createRoot(document.getElementById('root')!)
 

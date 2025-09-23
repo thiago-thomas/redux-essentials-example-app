@@ -27,7 +27,7 @@ export const SinglePostPage = () => {
     )
   }
 
-  const canEdit = currentUser.id === post.userId
+  const canEdit = currentUser.id === post.user
 
   return (
     <section>
@@ -38,7 +38,7 @@ export const SinglePostPage = () => {
           <span>
             Post made by{' '}
             <strong>
-              <PostAuthor userId={post.userId} />
+              <PostAuthor userId={post.user} />
             </strong>
           </span>
         </div>
