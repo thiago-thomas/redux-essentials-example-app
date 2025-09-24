@@ -29,6 +29,18 @@ export interface Post {
 //Pick serve para 'clonar' uma tipagem, pegando apenas os tipos que quer
 type PostUpdate = Pick<Post, 'id' | 'title' | 'content'>
 
+type NewPost = Pick<Post, 'title' | 'content' | 'user'>
+
+export const addNewPost = createAppAsyncThunk('post/addNewPost',
+  //O criador do payload recebe um objeto parcial (title, content, user)
+  async (initialPost: NewPost) => {
+    //Mandamos o dado inicial para a API fake
+    const response = await client.post<Post>('fakeApi/posts', initialPost)
+    //A resposta inclue o objeto post completo, incluindo o ID único
+    return response.data
+  }
+)
+
 const initialReactions: Reactions = {
   thumbsUp: 0,
   tada: 0,
@@ -73,27 +85,16 @@ const postsSlice = createSlice({
   reducers: {
     //DICA: Nomeclatura boa para reducer é colocar uma ação no passado (Ex: postAdded)
     //Reducer de adicionar o post passando o state, e a action tipada
-    postAdded: {
-      reducer(state, action: PayloadAction<Post>) {
-        state.posts.push(action.payload) //Atualizando a lista imutavelmente com immer
-      },
-      //`prepare` serve para pré-processar os dados da action
-      // antes de chegar ao reducer, garantindo que o formato
-      // esteja correto e que informações adicionais (como o `id`)
-      // sejam incluídas automaticamente.
-      prepare(title: string, content: string, user: string) {
-        return {
-          payload: {
-            id: nanoid(),
-            title,
-            content,
-            user,
-            date: new Date().toISOString(),
-            reactions: initialReactions,
-          },
-        }
-      },
-    },
+
+    // postAdded: {}   <= REMOVIDO porque agora a gente manda pra API
+    
+    //`prepare` serve para pré-processar os dados da action
+    // antes de chegar ao reducer, garantindo que o formato
+    // esteja correto e que informações adicionais (como o `id`)
+    // sejam incluídas automaticamente.
+
+    //prepare(title: string, content: string, user: string) {} <= PREPARE REMOVIDO
+
     //Reducer de editar o post com immer (não esquecer)
     postUpdated: (state, action: PayloadAction<PostUpdate>) => {
       const { id, title, content } = action.payload
@@ -145,6 +146,9 @@ const postsSlice = createSlice({
         state.status = 'failed'
         state.error = action.error.message ?? 'Unknown Error'
       })
+      .addCase(addNewPost.fulfilled, (state, action) => {
+        state.posts.push(action.payload)
+      })
   },
 })
 
@@ -152,7 +156,7 @@ const postsSlice = createSlice({
 export const { selectAllPosts, selectPostById, selectPostsStatus, selectPostsError } = postsSlice.selectors
 
 //Exportando as action creators
-export const { postAdded, postUpdated, reactionAdded } = postsSlice.actions
+export const { postUpdated, reactionAdded } = postsSlice.actions
 
 //Exportando a função reducer gerada
 export default postsSlice.reducer
