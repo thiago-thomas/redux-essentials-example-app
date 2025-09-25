@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { nanoid } from '@reduxjs/toolkit'
 //Importando o useDispatch tipado
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 //Importando o tipo do Post, e o action creator
-import { type Post, postAdded } from '@/features/posts/postsSlice'
+import { addNewPost, type Post } from '@/features/posts/postsSlice'
 
 import { selectCurrentUser } from '@/features/users/usersSlice'
 
@@ -18,21 +18,40 @@ interface AddPostFormElements extends HTMLFormElement {
 }
 
 export function AddPostForm() {
+  const [addRequestStatus, setAddRequestStatus] = useState<'idle' | 'pending'>('idle')
+
   const dispatch = useAppDispatch()
 
   // Aqui, 'user' nunca será considerado undefined pelo TypeScript
   const user = useAppSelector(selectCurrentUser)!
 
-  const handleSubmit = (e: React.FormEvent<AddPostFormElements>) => {
+  const handleSubmit = async (e: React.FormEvent<AddPostFormElements>) => {
     e.preventDefault()
 
     const { elements } = e.currentTarget
     const titleForm = elements.postTitle.value
     const contentForm = elements.postContent.value
 
+    const form = e.currentTarget
+
+    try {
+      setAddRequestStatus('pending')
+      await dispatch(
+        addNewPost({
+          title: titleForm,
+          content: contentForm,
+          user: user.id,
+        }),
+      ).unwrap()
+    } catch (error) {
+      console.error('Failed to save the post: ', error)
+    } finally {
+      setAddRequestStatus('idle')
+    }
+
     //Agora nos podemos passar em parametros separados,
     //E o ID será gerado automaticamente
-    dispatch(postAdded(titleForm, contentForm, user.id))
+    //dispatch(postAdded(titleForm, contentForm, user.id))
 
     console.log(titleForm, contentForm, user.id) //Testando no console.log
     e.currentTarget.reset()
@@ -46,7 +65,9 @@ export function AddPostForm() {
         <input type="text" id="postTitle" defaultValue="" placeholder="Put the post title" required />
         <label htmlFor="postContent">Content:</label>
         <textarea name="postContent" id="postContent" defaultValue="" required placeholder="Write the content" />
-        <button>Save Post</button>
+        <button type="submit" disabled={addRequestStatus !== 'idle'}>
+          Save Post
+        </button>
       </form>
     </section>
   )

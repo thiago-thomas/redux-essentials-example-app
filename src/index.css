@@ -184,6 +184,7 @@ p.post-content {
 button:disabled,
 button:disabled:hover {
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
 button.reaction-button {
